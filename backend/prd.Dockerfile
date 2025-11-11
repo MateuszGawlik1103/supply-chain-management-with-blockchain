@@ -6,4 +6,4 @@ COPY package*.json ./
 RUN npm install --production
 COPY . .
 
-CMD ["node", "example.js"]
+CMD ["node", "src/example.js"]

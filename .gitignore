@@ -163,3 +163,4 @@ network/system-genesis-block/*
 log.txt
 
 backend/secrets
+backend/certs

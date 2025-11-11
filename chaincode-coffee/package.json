@@ -1,7 +1,7 @@
 {
     "name": "asset-transfer-ledger-queries",
     "version": "0.0.1",
-    "description": "Hyperledger Fabric Asset Transfer Chaincode written in TypeScript",
+    "description": "Hyperledger Fabric Coffee Chaincode written in TypeScript",
     "main": "dist/index.js",
     "scripts": {
         "build": "tsc",

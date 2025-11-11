@@ -6,13 +6,19 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 dotenv.config();
 
+let number = 1;
+
+console.log(process.env.CERTS_PATH)
+console.log(process.env.KEY_PATH)
 const channelName = 'mychannel';
 const chaincodeName = 'coffee';
 const mspId = 'Org1MSP';
+const userId = process.env.APP_USER
 
-const certPath = process.env.CERT_PATH || '/run/secrets/cert.pem';
-const keyPath = '/run/secrets/key.pem';
-const tlsCertPath = process.env.TLS_CERT_PATH || '/run/secrets/ca.crt';
+const certificatesPath = process.env.CERTS_PATH
+const certPath = `${certificatesPath}/${userId}-cert.pem`;
+const tlsCertPath = `${certificatesPath}/${userId}-ca.pem`;
+const keyPath = process.env.KEY_PATH;
 
 const peerEndpoint = process.env.PEER_ENDPOINT || 'peer0.org1.example.com:7051';
 
@@ -59,29 +65,29 @@ async function main(orderId, batchId) {
 			const network = gateway.getNetwork(channelName);
 			const contract = network.getContract(chaincodeName);
 
-			console.log('Connected to the Fabric Gateway');
+			// console.log('Connected to the Fabric Gateway');
 
-			console.log('Invoking placeOrder...');
-			await contract.submitTransaction('placeOrder', orderId, 'Arabica', '100', 'ORG3', '2025-11-10');
-			console.log('Order placed successfully');
+			// console.log('Invoking placeOrder...');
+			// await contract.submitTransaction('placeOrder', orderId, 'Arabica', '100', 'ORG3', '2025-11-10');
+			// console.log('Order placed successfully');
 
-			console.log('Invoking createBatch...');
-			await contract.submitTransaction('createBatch', batchId, orderId, '100', 'ORG1');
-			console.log('Batch created successfully');
+			// console.log('Invoking createBatch...');
+			// await contract.submitTransaction('createBatch', batchId, orderId, '100', 'ORG1');
+			// console.log('Batch created successfully');
 
-			console.log('Invoking shipBatch...');
-			await contract.submitTransaction('shipBatch', batchId, 'ORG2');
-			console.log('Batch shipped successfully');
+			// console.log('Invoking shipBatch...');
+			// await contract.submitTransaction('shipBatch', batchId, 'ORG2');
+			// console.log('Batch shipped successfully');
 
-			console.log('🌡️ Updating temperature and humidity...');
-			await contract.submitTransaction('updateTemperatureAndHumidity', batchId, '30', '10');
-			await new Promise((r) => setTimeout(r, 3000));
-			await contract.submitTransaction('updateTemperatureAndHumidity', batchId, '32', '12');
-			console.log('Temperature updates committed');
+			// console.log('Updating temperature and humidity...');
+			// await contract.submitTransaction('updateTemperatureAndHumidity', batchId, '30', '10');
+			// await new Promise((r) => setTimeout(r, 3000));
+			// await contract.submitTransaction('updateTemperatureAndHumidity', batchId, '32', '12');
+			// console.log('Temperature updates committed');
 
-			console.log('Delivering batch...');
-			await contract.submitTransaction('deliverBatch', batchId, 'ORG3');
-			console.log('Batch delivered successfully');
+			// console.log('Delivering batch...');
+			// await contract.submitTransaction('deliverBatch', batchId, 'ORG3');
+			// console.log('Batch delivered successfully');
 
 			console.log('Fetching order history...');
 			const resultOrderBytes  = await contract.evaluateTransaction('getOrderHistory', orderId);
@@ -106,5 +112,4 @@ async function main(orderId, batchId) {
 	}
 }
 
-let number = 25;
 main(`ORDER${number}`, `O${number}_batch1`);

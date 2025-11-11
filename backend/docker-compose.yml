@@ -2,22 +2,21 @@ version: "3.8"
 
 services:
   backend:
-    image: backend
+    image: backend-prd
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - USER_ID=appuser
+      - CERTS_PATH=/usr/src/app/certs
+      - KEY_PATH=/run/secrets/key
+      - APP_USER=appUser1
     secrets:
-      - appuser-cert
-      - appuser-key
+      - key
     networks:
       - fabric_test
 
 secrets:
-  appuser-cert:
-    external: true
-  appuser-key:
+  key:
     external: true
 
 networks:

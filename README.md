@@ -211,11 +211,18 @@ invoke -c '{
 # Backend
 
 ## Prod
+
+Create following file in `backend/secrets/` folder:
+- key - private key
+
+Add secret:
 ```
-docker secret create key secrets/key.pem
-docker secret create cert secrets/cert.pem
-docker secret create ca secrets/ca.crt
+docker secret create key secrets/appUser1-key.pem
 ```
+
+Create following files in `backend/certs/` folder:
+- ca - TLS certificate
+- cert - public certificate
 
 ```
 docker build -t backend-prd -f prd.Dockerfile .
@@ -240,11 +247,45 @@ docker run --rm -it \
   --name backend-dev \
   --network fabric_test \
   -v $(pwd)/secrets/:/run/secrets/ \
+  -v $(pwd)/certs/:/run/certs/ \
   -v $(pwd)/.eslintrc.js:/usr/src/app/.eslintrc.js \
   -v $(pwd)/package.json:/usr/src/app/package.json \
+  -v $(pwd)/.env:/usr/src/app/.env \
   -v $(pwd)/package-lock.json:/usr/src/app/package-lock.json \
   -v $(pwd)/src/:/usr/src/app/src/ \
   -p 3000:3000 \
   backend-dev \
   /bin/sh
+```
+
+
+# Enroll read-only user
+```
+fabric-ca-client enroll \
+  -u https://admin:adminpw@localhost:7054 \
+  --caname ca-org1 \
+  --tls.certfiles $CORE_PEER_TLS_ROOTCERT_FILE_ORG1
+```
+
+```
+fabric-ca-client register \
+  --caname ca-org1 \
+  --id.name readUser2 \
+  --id.secret readUser2pw \
+  --id.type client \
+  --id.attrs "hf.AffiliationMgr=false,hf.Revoker=false,hf.IntermediateCA=false,hf.GenCRL=false" \
+  -u https://admin:adminpw@localhost:7054 \
+  --tls.certfiles $CORE_PEER_TLS_ROOTCERT_FILE_ORG1
+```
+
+```
+fabric-ca-client enroll -u https://readUser2:readUser2pw@localhost:7054 --caname ca-org1 \
+  -u https://admin:adminpw@localhost:7054 \
+  --tls.certfiles $CORE_PEER_TLS_ROOTCERT_FILE_ORG1
+```
+
+```
+fabric-ca-client identity list \
+  -u https://admin:adminpw@localhost:7054 \
+  --tls.certfiles $CORE_PEER_TLS_ROOTCERT_FILE_ORG1
 ```

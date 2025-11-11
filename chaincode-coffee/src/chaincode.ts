@@ -18,6 +18,19 @@ export class CoffeeSupplyChainContract extends Contract {
         orderingOrg: string,
         expectedDelivery: string
     ): Promise<void> {
+        // Check if user is authorized to execute this function
+        const canWrite  = ctx.clientIdentity.getAttributeValue('canWrite');
+        // Check if organization is authorized to execute this function
+        const organization  = ctx.clientIdentity.getAttributeValue('organization');
+
+        if (canWrite !== "1") {
+            throw new Error('Not authorized to write!');
+        }
+
+        if (organization !== "org1") {
+            throw new Error('Not authorized to write!');
+        }
+
         const exists = await ctx.stub.getState(orderId);
         if (exists && exists.length > 0) {
             throw new Error(`Order already exists: ${orderId}`);
@@ -28,11 +41,11 @@ export class CoffeeSupplyChainContract extends Contract {
         order.coffeeType = coffeeType;
         order.quantity = quantity;
         order.orderingOrg = orderingOrg;
+
         const txTimestamp = await ctx.stub.getTxTimestamp();
-        const orderDate = new Date(
-            txTimestamp.seconds.low * 1000
-        ).toISOString();
+        const orderDate = new Date(txTimestamp.seconds.low * 1000).toISOString();
         order.orderDate = orderDate;
+
         order.expectedDelivery = expectedDelivery;
         order.status = 'ORDER_PLACED';
         order.batchIds = [];
@@ -49,6 +62,19 @@ export class CoffeeSupplyChainContract extends Contract {
         quantity: number,
         productOwner: string
     ): Promise<void> {
+        // Check if user is authorized to execute this function
+        const canWrite  = ctx.clientIdentity.getAttributeValue('canWrite');
+        // Check if organization is authorized to execute this function
+        const organization  = ctx.clientIdentity.getAttributeValue('organization');
+
+        if (canWrite !== "1") {
+            throw new Error('Not authorized to write!');
+        }
+
+        if (organization !== "org1") {
+            throw new Error('Not authorized to write!');
+        }
+
         const existingBatch = await ctx.stub.getState(batchId);
         if (existingBatch && existingBatch.length > 0) {
             throw new Error(`Batch ${batchId} already exists`);
@@ -84,6 +110,19 @@ export class CoffeeSupplyChainContract extends Contract {
     // ===== 3. Ship batch to next org =====
     @Transaction()
     public async shipBatch(ctx: Context, batchId: string, productOwner: string): Promise<void> {
+        // Check if user is authorized to execute this function
+        const canWrite  = ctx.clientIdentity.getAttributeValue('canWrite');
+        // Check if organization is authorized to execute this function
+        const organization  = ctx.clientIdentity.getAttributeValue('organization');
+
+        if (canWrite !== "1") {
+            throw new Error('Not authorized to write!');
+        }
+
+        if (organization !== "org2") {
+            throw new Error('This organization is not authorized to execute this transaction!');
+        }
+
         const batchBytes = await ctx.stub.getState(batchId);
         if (!batchBytes || batchBytes.length === 0) {
             throw new Error(`Batch ${batchId} does not exist`);
@@ -111,6 +150,19 @@ export class CoffeeSupplyChainContract extends Contract {
         temperature: number,
         humidity: number
     ): Promise<void> {
+        // Check if user is authorized to execute this function
+        const canWrite  = ctx.clientIdentity.getAttributeValue('canWrite');
+        // Check if organization is authorized to execute this function
+        const organization  = ctx.clientIdentity.getAttributeValue('organization');
+
+        if (canWrite !== "1") {
+            throw new Error('Not authorized to write!');
+        }
+
+        if (organization !== "org2") {
+            throw new Error('This organization is not authorized to execute this transaction!');
+        }
+
         const batchBytes = await ctx.stub.getState(batchId);
         if (!batchBytes || batchBytes.length === 0) {
             throw new Error(`Batch ${batchId} does not exist`);
@@ -126,6 +178,18 @@ export class CoffeeSupplyChainContract extends Contract {
     // ===== 5. Deliver batch =====
     @Transaction()
     public async deliverBatch(ctx: Context, batchId: string, productOwner: string): Promise<void> {
+        // Check if user is authorized to execute this function
+        const canWrite  = ctx.clientIdentity.getAttributeValue('canWrite');
+        // Check if organization is authorized to execute this function
+        const organization  = ctx.clientIdentity.getAttributeValue('organization');
+
+        if (canWrite !== "1") {
+            throw new Error('Not authorized to write!');
+        }
+
+        if (organization !== "org3") {
+            throw new Error('This organization is not authorized to execute this transaction!');
+        }
         
         // Batch
         const batchBytes = await ctx.stub.getState(batchId);

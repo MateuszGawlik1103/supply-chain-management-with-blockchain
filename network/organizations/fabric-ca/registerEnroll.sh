@@ -47,19 +47,46 @@ EOF
 
   mkdir -p "${ORG_PATH}/ca"
   cp "${PWD}/organizations/fabric-ca/${ORG_NAME}/ca-cert.pem" "${ORG_PATH}/ca/ca.${ORG_NAME}.${ORG_DOMAIN}-cert.pem"
-
   infoln "Registering identities for ${ORG_NAME}"
-  for ID in "peer0:peer0pw:peer" "user1:user1pw:client" "${ORG_NAME}admin:${ORG_NAME}adminpw:admin"; do
-    IFS=":" read -r NAME PASS TYPE <<< "$ID"
+  for ID in \
+    "peer0:peer0pw:peer:none" \
+    "${ORG_NAME}admin:${ORG_NAME}adminpw:admin:1" \
+    "user1:user1pw:client:1" \
+    "appUser1:appUser1pw:client:0"
+  do
+    IFS=":" read -r NAME PASS TYPE CANWRITE <<< "$ID"
     set -x
-    fabric-ca-client register \
-      --caname ${CA_NAME} \
-      --id.name ${NAME} \
-      --id.secret ${PASS} \
-      --id.type ${TYPE} \
-      --tls.certfiles "${PWD}/organizations/fabric-ca/${ORG_NAME}/ca-cert.pem"
+    if [ "$CANWRITE" = "1" ]; then
+      # user with write permission
+      fabric-ca-client register \
+        --caname ${CA_NAME} \
+        --id.name ${NAME} \
+        --id.secret ${PASS} \
+        --id.type ${TYPE} \
+        --id.attrs "canWrite=1:ecert,organization=${ORG_NAME}:ecert" \
+        --tls.certfiles "${PWD}/organizations/fabric-ca/${ORG_NAME}/ca-cert.pem"
+    elif [ "$CANWRITE" = "0" ]; then
+      # user without write permission
+      fabric-ca-client register \
+        --caname ${CA_NAME} \
+        --id.name ${NAME} \
+        --id.secret ${PASS} \
+        --id.type ${TYPE} \
+        --id.attrs "canWrite=0:ecert,organization=${ORG_NAME}:ecert" \
+        --tls.certfiles "${PWD}/organizations/fabric-ca/${ORG_NAME}/ca-cert.pem"
+    else
+      # Peer don't need this attribute
+      fabric-ca-client register \
+        --caname ${CA_NAME} \
+        --id.name ${NAME} \
+        --id.secret ${PASS} \
+        --id.type ${TYPE} \
+        --id.attrs "organization=${ORG_NAME}:ecert" \
+        --tls.certfiles "${PWD}/organizations/fabric-ca/${ORG_NAME}/ca-cert.pem"
+    fi
     { set +x; } 2>/dev/null
   done
+
 
   infoln "Generating peer0 MSP for ${ORG_NAME}"
   local PEER_PATH="${ORG_PATH}/peers/peer0.${ORG_NAME}.${ORG_DOMAIN}"
@@ -84,7 +111,7 @@ EOF
   cp "${PEER_PATH}/tls/signcerts/"* "${PEER_PATH}/tls/server.crt"
   cp "${PEER_PATH}/tls/keystore/"* "${PEER_PATH}/tls/server.key"
 
-  for USER in "user1:user1pw:User1@${ORG_NAME}.${ORG_DOMAIN}" "${ORG_NAME}admin:${ORG_NAME}adminpw:Admin@${ORG_NAME}.${ORG_DOMAIN}"; do
+  for USER in "user1:user1pw:User1@${ORG_NAME}.${ORG_DOMAIN}" "${ORG_NAME}admin:${ORG_NAME}adminpw:Admin@${ORG_NAME}.${ORG_DOMAIN}" "appUser1:appUser1pw:appUser1@${ORG_NAME}.${ORG_DOMAIN}"; do
     IFS=":" read -r NAME PASS MSP_DIR <<< "$USER"
     infoln "Generating MSP for ${MSP_DIR}"
     fabric-ca-client enroll \
@@ -94,6 +121,7 @@ EOF
       --tls.certfiles "${PWD}/organizations/fabric-ca/${ORG_NAME}/ca-cert.pem"
     cp "${ORG_PATH}/msp/config.yaml" "${ORG_PATH}/users/${MSP_DIR}/msp/config.yaml"
   done
+
 }
 
 

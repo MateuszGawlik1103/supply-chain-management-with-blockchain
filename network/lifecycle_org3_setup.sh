@@ -12,6 +12,7 @@ export CORE_PEER_TLS_ROOTCERT_FILE_ORG1=$PWD/organizations/peerOrganizations/org
 export CORE_PEER_TLS_ROOTCERT_FILE_ORG2=$PWD/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
 
 export CORE_PEER_TLS_ROOTCERT_FILE_ORG3=$PWD/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
+export FABRIC_CA_CLIENT_HOME=${PWD}/organizations/peerOrganizations/org3.example.com/
 
 export CORE_PEER_MSPCONFIGPATH=${PWD}/\
 organizations/peerOrganizations/org3.example.com/\
