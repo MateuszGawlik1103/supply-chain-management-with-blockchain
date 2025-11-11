@@ -9,6 +9,12 @@ export class Batch {
   public batchId: string = '';
 
   @Property()
+  public orderId: string = '';
+
+  @Property()
+  public productOwner: string = '';
+
+  @Property()
   public status: string = 'AT_FARM';
 
   @Property()

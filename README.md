@@ -5,6 +5,7 @@ wsl
 ```
 
 ```
+cd network
 ./network.sh up createChannel -c mychannel -ca -s couchdb
 ```
 
@@ -119,11 +120,56 @@ invoke -c '{
         "ORDER1",
         "Arabica",
         "100",
-        "ORG1",
+        "ORG3",
         "2025-11-10"
     ]
 }'
 ```
+
+```
+invoke -c '{
+    "Args": [
+        "createBatch",
+        "O1_Batch1",
+        "ORDER1",
+        "100",
+        "ORG1"
+    ]
+}'
+```
+
+
+```
+invoke -c '{
+    "Args": [
+        "shipBatch",
+        "O1_Batch1",
+        "ORG2"
+    ]
+}'
+```
+
+```
+invoke -c '{
+    "Args": [
+        "updateTemperatureAndHumidity",
+        "O1_Batch1",
+        "30",
+        "10"
+    ]
+}'
+```
+
+```
+invoke -c '{
+    "Args": [
+        "deliverBatch",
+        "O1_Batch1",
+        "ORG3"
+    ]
+}'
+```
+
 
 Query order:
 ```
@@ -138,18 +184,8 @@ invoke -c '{
 ```
 invoke -c '{
     "Args": [
-        "prepareProductForDelivery",
-        "ORDER1",
-        "Batch1"
-    ]
-}'
-```
-
-```
-invoke -c '{
-    "Args": [
         "queryBatch",
-        "Batch1"
+        "O1_Batch1"
     ]
 }'
 ```
@@ -157,29 +193,58 @@ invoke -c '{
 ```
 invoke -c '{
     "Args": [
-        "shipBatch",
-        "Batch1"
+        "getBatchHistory",
+        "O1_Batch1"
     ]
-}'
+}' 2>&1 | grep -oP '(?<=payload:").*(?=")' | sed 's/\\"/"/g' | jq '.'
 ```
 
 ```
 invoke -c '{
     "Args": [
-        "updateTemperatureAndHumidity",
-        "Batch1",
-        "30",
-        "10"
+        "getOrderHistory",
+        "ORDER1"
     ]
-}'
+}' 2>&1 | grep -oP '(?<=payload:").*(?=")' | sed 's/\\"/"/g' | jq '.'
+```
+
+# Backend
+
+## Prod
+```
+docker secret create key secrets/key.pem
+docker secret create cert secrets/cert.pem
+docker secret create ca secrets/ca.crt
 ```
 
 ```
-invoke -c '{
-    "Args": [
-        "deliverBatch",
-        "ORDER1",
-        "Batch1"
-    ]
-}'
+docker build -t backend-prd -f prd.Dockerfile .
+```
+
+```
+docker stack deploy -c docker-compose.yml backend-prd
+```
+
+```
+docker stack rm backend-prd
+```
+
+## Dev
+
+```
+docker build -t backend-dev -f dev.Dockerfile .
+```
+
+```
+docker run --rm -it \
+  --name backend-dev \
+  --network fabric_test \
+  -v $(pwd)/secrets/:/run/secrets/ \
+  -v $(pwd)/.eslintrc.js:/usr/src/app/.eslintrc.js \
+  -v $(pwd)/package.json:/usr/src/app/package.json \
+  -v $(pwd)/package-lock.json:/usr/src/app/package-lock.json \
+  -v $(pwd)/src/:/usr/src/app/src/ \
+  -p 3000:3000 \
+  backend-dev \
+  /bin/sh
 ```

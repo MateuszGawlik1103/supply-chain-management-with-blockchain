@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  backend:
+    image: backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - USER_ID=appuser
+    secrets:
+      - appuser-cert
+      - appuser-key
+    networks:
+      - fabric_test
+
+secrets:
+  appuser-cert:
+    external: true
+  appuser-key:
+    external: true
+
+networks:
+  fabric_test:
+    external: true
