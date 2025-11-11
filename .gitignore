@@ -161,3 +161,5 @@ network/organizations/peerOrganizations/*
 network/system-genesis-block/*
 *.tar.gz
 log.txt
+
+backend/secrets
