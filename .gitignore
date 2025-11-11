@@ -155,6 +155,7 @@ network/org3-artifacts/crypto-config/*
 network/organizations/fabric-ca/ordererOrg/*
 network/organizations/fabric-ca/org1/*
 network/organizations/fabric-ca/org2/*
+network/organizations/fabric-ca/org3/*
 network/organizations/ordererOrganizations/*
 network/organizations/peerOrganizations/*
 network/system-genesis-block/*
