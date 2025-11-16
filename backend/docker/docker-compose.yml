@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  backend:
+    image: backend-prd
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - CERTS_PATH=/usr/src/app/certs
+      - KEY_PATH=/run/secrets/key
+      - APP_USER=appUser1
+      - DATABASE_HOST=postgres
+      - DATABASE_USER=coffee_user
+      - DATABASE_NAME=coffee_db
+      - DATABASE_PASSWORD_FILE=/run/secrets/postgres_password
+      - JWT_SECRET=supersecret
+    secrets:
+      - key
+      - postgres_password
+    depends_on:
+      - postgres
+    networks:
+      - fabric_test
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: coffee_user
+      POSTGRES_DB: coffee_db
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    ports:
+      - "5432:5432"
+    secrets:
+      - postgres_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - fabric_test
+
+secrets:
+  key:
+    external: true
+  postgres_password:
+    external: true
+
+volumes:
+  postgres_data:
+
+networks:
+  fabric_test:
+    external: true

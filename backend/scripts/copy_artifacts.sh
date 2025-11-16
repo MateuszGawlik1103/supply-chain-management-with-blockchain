@@ -4,12 +4,12 @@ set -e
 # ================================
 # Configuration
 # ================================
+APP_USER="$1"
 ORG_NAME="org1"
 ORG_DOMAIN="example.com"
-APP_USER="appUser1"
-NETWORK_DIR="../../network"   # relative path from backend/scripts/
-BACKEND_CERTS_DIR="../certs"
-BACKEND_SECRETS_DIR="../secrets"
+NETWORK_DIR="${PWD}/../network"   # relative path from backend/scripts/
+BACKEND_CERTS_DIR="${PWD}/certs"
+BACKEND_SECRETS_DIR="${PWD}/secrets"
 
 # ================================
 # Paths to Fabric MSP files
@@ -44,7 +44,7 @@ fi
 # ================================
 echo "Cleaning old backend certificates and keys..."
 rm -rf "${BACKEND_CERTS_DIR:?}/"*
-rm -rf "${BACKEND_SECRETS_DIR:?}/"*
+rm -f "${BACKEND_SECRETS_DIR:?}"/*.pem
 
 # ================================
 # Create directories if not exist

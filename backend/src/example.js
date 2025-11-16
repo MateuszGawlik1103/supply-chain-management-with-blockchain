@@ -8,8 +8,6 @@ dotenv.config();
 
 let number = 1;
 
-console.log(process.env.CERTS_PATH)
-console.log(process.env.KEY_PATH)
 const channelName = 'mychannel';
 const chaincodeName = 'coffee';
 const mspId = 'Org1MSP';
@@ -33,6 +31,8 @@ function prettyJSONString(inputString) {
 async function main(orderId, batchId) {
 	try {
 		console.log('Loading certificates and keys...');
+		console.log(orderId)
+		console.log(batchId)
 
 		// Private key
 		const privateKeyPem = fs.readFileSync(keyPath, 'utf8');
@@ -112,4 +112,4 @@ async function main(orderId, batchId) {
 	}
 }
 
-main(`ORDER${number}`, `O${number}_batch1`);
+main(`ORDER${number}`, `O${number}_Batch1`);

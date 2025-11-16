@@ -5,6 +5,10 @@ wsl
 ```
 
 ```
+docker network create -d overlay --attachable fabric_test
+```
+
+```
 cd network
 ./network.sh up createChannel -c mychannel -ca -s couchdb
 ```
@@ -185,7 +189,7 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "queryBatch",
-        "O1_Batch1"
+        "O1_BATCH1"
     ]
 }'
 ```
@@ -225,11 +229,11 @@ Create following files in `backend/certs/` folder:
 - cert - public certificate
 
 ```
-docker build -t backend-prd -f prd.Dockerfile .
+docker build -t backend-prd -f docker/prd.Dockerfile .
 ```
 
 ```
-docker stack deploy -c docker-compose.yml backend-prd
+docker stack deploy -c docker/docker-compose.yml backend-prd
 ```
 
 ```
@@ -289,3 +293,30 @@ fabric-ca-client identity list \
   -u https://admin:adminpw@localhost:7054 \
   --tls.certfiles $CORE_PEER_TLS_ROOTCERT_FILE_ORG1
 ```
+
+
+```
+curl -s http://localhost:3000/order/ORDER1/history | jq .
+curl http://localhost:3000/batch/O1_Batch1/history | jq .
+```
+
+
+echo "coffee_pass" | docker secret create postgres_password -
+
+
+```
+curl -X POST http://localhost:3000/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"janek","password":"tajnehaslo123"}'
+```
+
+```
+curl -X POST http://localhost:3000/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"janek","password":"tajnehaslo123"}'
+```
+
+psql -h localhost -U coffee_user -d coffee_db
+
+curl http://localhost:3000/batch/O1_Batch1/history \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2MzI4MzU5OCwiZXhwIjoxNzYzMjg3MTk4fQ.I5iIWWhwbFKPDrxf0L1b3Eb4faEw1MonuWxEN3y52CU"
