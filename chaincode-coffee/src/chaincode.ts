@@ -14,6 +14,7 @@ export class CoffeeSupplyChainContract extends Contract {
         ctx: Context,
         orderId: string,
         coffeeType: string,
+        description: string,
         quantity: number,
         orderingOrg: string,
         expectedDelivery: string
@@ -27,7 +28,7 @@ export class CoffeeSupplyChainContract extends Contract {
             throw new Error('Not authorized to write!');
         }
 
-        if (organization !== "org1") {
+        if (organization !== "org3") {
             throw new Error('Not authorized to write!');
         }
 
@@ -41,6 +42,7 @@ export class CoffeeSupplyChainContract extends Contract {
         order.coffeeType = coffeeType;
         order.quantity = quantity;
         order.orderingOrg = orderingOrg;
+        order.description = description;
 
         const txTimestamp = await ctx.stub.getTxTimestamp();
         const orderDate = new Date(txTimestamp.seconds.low * 1000).toISOString();
@@ -58,6 +60,7 @@ export class CoffeeSupplyChainContract extends Contract {
     public async createBatch(
         ctx: Context,
         batchId: string,
+        originFarm: string,
         orderId: string,
         quantity: number,
         productOwner: string
@@ -94,6 +97,7 @@ export class CoffeeSupplyChainContract extends Contract {
             productOwner,
             status: 'AT_FARM',
             quantity,
+            originFarm
         };
 
         batch.status = 'READY_FOR_DELIVERY'
@@ -109,7 +113,12 @@ export class CoffeeSupplyChainContract extends Contract {
 
     // ===== 3. Ship batch to next org =====
     @Transaction()
-    public async shipBatch(ctx: Context, batchId: string, productOwner: string): Promise<void> {
+    public async shipBatch(
+        ctx: Context,
+        batchId: string,
+        productOwner: string,
+        transport: string
+    ): Promise<void> {
         // Check if user is authorized to execute this function
         const canWrite  = ctx.clientIdentity.getAttributeValue('canWrite');
         // Check if organization is authorized to execute this function
@@ -137,7 +146,8 @@ export class CoffeeSupplyChainContract extends Contract {
         }
 
         batch.status = 'IN_TRANSIT';
-        batch.productOwner = productOwner
+        batch.productOwner = productOwner;
+        batch.transport = transport;
 
         await ctx.stub.putState(batchId, Buffer.from(JSON.stringify(batch)));
     }
@@ -177,10 +187,17 @@ export class CoffeeSupplyChainContract extends Contract {
 
     // ===== 5. Deliver batch =====
     @Transaction()
-    public async deliverBatch(ctx: Context, batchId: string, productOwner: string): Promise<void> {
-        // Check if user is authorized to execute this function
+    public async deliverBatch(
+        ctx: Context, 
+        batchId: string, 
+        productOwner: string,
+        location: string,
+        qualityCheck: string,
+        packagingType: string,
+        roastLevel: string
+    ): Promise<void> {
+
         const canWrite  = ctx.clientIdentity.getAttributeValue('canWrite');
-        // Check if organization is authorized to execute this function
         const organization  = ctx.clientIdentity.getAttributeValue('organization');
 
         if (canWrite !== "1") {
@@ -190,20 +207,20 @@ export class CoffeeSupplyChainContract extends Contract {
         if (organization !== "org3") {
             throw new Error('This organization is not authorized to execute this transaction!');
         }
-        
-        // Batch
+
+        // --- Read batch ---
         const batchBytes = await ctx.stub.getState(batchId);
 
-        if (!batchBytes) {
+        if (!batchBytes || batchBytes.length === 0) {
             throw new Error(`Batch does not exist`);
         }
 
         const batch: Batch = JSON.parse(batchBytes.toString());
 
-        // Order
+        // --- Read order ---
         const orderBytes = await ctx.stub.getState(batch.orderId);
 
-        if (!orderBytes) {
+        if (!orderBytes || orderBytes.length === 0) {
             throw new Error(`Order does not exist`);
         }
 
@@ -213,38 +230,49 @@ export class CoffeeSupplyChainContract extends Contract {
             throw new Error(`Batch ${batchId} is not in transit`);
         }
 
+        // ----- UPDATE BATCH -----
         batch.status = 'DELIVERED';
         batch.productOwner = productOwner;
 
-        // Update order status if all batches delivered
-        const allDelivered = order.batchIds.every((id) => id === batchId || batch.status === 'DELIVERED');
-        if (allDelivered) {
+        batch.temperature = null;
+        batch.humidity = null;
+        batch.transport = null;
 
+        // New fields by distributor
+        batch.location = location;
+        batch.qualityCheck = qualityCheck;
+        batch.packagingType = packagingType;
+        batch.roastLevel = roastLevel;
+
+        // ----- UPDATE ORDER -----
+        const allDelivered = order.batchIds.every((id) => id === batchId || batch.status === 'DELIVERED');
+
+        if (allDelivered) {
             let totalQuantity = 0;
 
             for (const batchId of order.batchIds) {
                 const batchBytes = await ctx.stub.getState(batchId);
+
                 if (!batchBytes || batchBytes.length === 0) {
                     throw new Error(`Batch ${batchId} does not exist`);
                 }
 
-                const batch: Batch = JSON.parse(batchBytes.toString());
-                totalQuantity += batch.quantity;
+                const b: Batch = JSON.parse(batchBytes.toString());
+                totalQuantity += b.quantity;
             }
 
-            console.log(`Total batch quantity: ${totalQuantity}, required: ${order.quantity}`);
-
-            // Jeśli suma ilości batchy == ilość z zamówienia
             if (totalQuantity >= order.quantity) {
                 order.status = 'ORDER_FULLFILLED';
             } else {
                 console.log(`Order ${order.orderId} not ready — only ${totalQuantity}/${order.quantity} prepared`);
             }
-
-            await ctx.stub.putState(batchId, Buffer.from(JSON.stringify(batch)));
-            await ctx.stub.putState(order.orderId, Buffer.from(JSON.stringify(order)));
         }
+
+        // Save updates
+        await ctx.stub.putState(batchId, Buffer.from(JSON.stringify(batch)));
+        await ctx.stub.putState(order.orderId, Buffer.from(JSON.stringify(order)));
     }
+
 
     // ===== 6. Query functions =====
     @Transaction(false)

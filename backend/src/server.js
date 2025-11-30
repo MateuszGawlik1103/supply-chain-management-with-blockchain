@@ -7,8 +7,10 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import pool from './db.js';
+import cors from 'cors';
 
 dotenv.config();
+
 
 // === Configuration ===
 const channelName = 'mychannel';
@@ -21,6 +23,9 @@ const tlsCertPath = `${certificatesPath}/${userId}-ca.pem`;
 const keyPath = process.env.KEY_PATH;
 const peerEndpoint = process.env.PEER_ENDPOINT || 'peer0.org1.example.com:7051';
 const JWT_SECRET = process.env.JWT_SECRET;
+
+console.log(userId)
+console.log(certificatesPath)
 
 function prettyJSONString(inputString) {
 	try {
@@ -79,6 +84,13 @@ async function connectGateway() {
 const app = express();
 app.use(express.json());
 
+// Allow requests from localhost:3000
+app.use(cors({
+  origin: 'http://frontend:80', // frontend dev server
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
+
 // Create a connection when the server starts
 let fabricConnection;
 
@@ -117,6 +129,12 @@ app.post('/login', async (req, res) => {
   res.json({ token });
 });
 
+// Logout route
+app.post('/logout', authMiddleware, (req, res) => {
+  res.json({ message: 'Successfully logged out' });
+});
+
+
 
 // Query order history
 app.get('/order/:id/history', async (req, res) => {
@@ -129,6 +147,36 @@ app.get('/order/:id/history', async (req, res) => {
 		console.error(error);
 		res.status(500).json({ error: error.message });
 	}
+});
+
+app.get('/order/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const resultBytes = await fabricConnection.contract.evaluateTransaction('queryOrder', id);
+    const resultString = Buffer.from(resultBytes).toString('utf8');
+    res.json(JSON.parse(resultString));
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ error: err.message });
+  }
+});
+
+app.get('/batch/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const resultBytes = await fabricConnection.contract.evaluateTransaction('queryBatch', id);
+
+    // Zamiana bajtów na string i parsowanie do JSON
+    const resultString = Buffer.from(resultBytes).toString('utf8');
+    const batchData = JSON.parse(resultString);
+
+    res.json(batchData);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ error: err.message || 'Batch not found' });
+  }
 });
 
 // Query batch history
@@ -156,6 +204,21 @@ app.get('/batch/:id/history', authMiddleware, async (req, res) => {
   }
 });
 
+app.get('/my-history', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    console.log(userId);
+    const result = await pool.query(
+      'SELECT batch_id FROM user_batches WHERE user_id = $1 ORDER BY id DESC',
+      [userId]
+    );
+
+    res.json({ history: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
 
 // Health check
 app.get('/', (req, res) => {
@@ -163,7 +226,7 @@ app.get('/', (req, res) => {
 });
 
 // === Start the server ===
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Backend listening on port ${PORT}`));
 
 // Handle graceful shutdown

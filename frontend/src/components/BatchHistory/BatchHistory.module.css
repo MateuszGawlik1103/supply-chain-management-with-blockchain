@@ -1,0 +1,122 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  color: #4b3b2a;
+  background-color: #f5f1e6;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.inputSection {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+  align-items: stretch;
+}
+
+.inputSection input,
+.inputSection button {
+  font-size: 16px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-sizing: border-box;
+  border: 1px solid #c2a785;
+  height: 100%;
+}
+
+.inputSection input {
+  flex: 3;
+  background-color: #fff8f0;
+  color: #4b3b2a;
+}
+
+.inputSection button {
+  flex: 1;
+  border: none;
+  background-color: #8b5e3c;
+  color: #fff8f0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.inputSection button:hover {
+  background-color: #5c3d29;
+}
+
+/* tryb mobilny */
+@media (max-width: 600px) {
+  .inputSection {
+    flex-direction: column;
+  }
+
+  .inputSection input,
+  .inputSection button {
+    flex: none;
+    width: 100%;
+    height: auto;
+  }
+}
+
+.orderDetails {
+  background-color: #fff8f0;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.orderDetails h1 {
+  margin-top: 0;
+  font-size: 24px;
+  color: #4b3b2a;
+}
+
+.orderDetails img {
+  width: 400px;
+  height: auto;
+  margin: 15px 0;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #c2a785;
+}
+
+.orderDetails p {
+  margin: 5px 0;
+  font-size: 16px;
+  color: #4b3b2a;
+  text-align: left;
+}
+
+
+.historyList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.historyItem {
+  background-color: #fff8f0;
+  padding: 15px 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.historyItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.historyItem strong {
+  color: #8b5e3c;
+}
+
+@media (max-width: 600px) {
+  .historyItem {
+    padding: 12px 15px;
+  }
+}

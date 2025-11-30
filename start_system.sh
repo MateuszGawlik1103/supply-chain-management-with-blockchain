@@ -11,6 +11,6 @@ cd ${ROOT_DIR}/network
 ./network.sh up createChannel -c mychannel -ca -s couchdb
 ./network.sh deployCC -ccn coffee -ccp ../chaincode-coffee -ccl typescript
 
-cd ${ROOT_DIR}/backend
+cd ${ROOT_DIR}
 
-./deploy_backend.sh
+./scripts/deploy_app_stack.sh

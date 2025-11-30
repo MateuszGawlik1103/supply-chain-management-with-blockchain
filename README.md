@@ -121,8 +121,9 @@ Add coffee order:
 invoke -c '{
     "Args": [
         "placeOrder",
-        "ORDER1",
+        "ORDER2",
         "Arabica",
+        "Arabica from select crops, known for its delicate acidity and clean, sweet finish. These beans are of consistent quality, ideal for specialty coffees.",
         "100",
         "ORG3",
         "2025-11-10"
@@ -134,21 +135,22 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "createBatch",
-        "O1_Batch1",
-        "ORDER1",
+        "O2_Batch1",
+        "Brazil",
+        "ORDER2",
         "100",
         "ORG1"
     ]
 }'
 ```
 
-
 ```
 invoke -c '{
     "Args": [
         "shipBatch",
-        "O1_Batch1",
-        "ORG2"
+        "O2_Batch1",
+        "ORG2",
+        "Container ship"
     ]
 }'
 ```
@@ -157,9 +159,9 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "updateTemperatureAndHumidity",
-        "O1_Batch1",
-        "30",
-        "10"
+        "O2_Batch1",
+        "34",
+        "15"
     ]
 }'
 ```
@@ -168,8 +170,12 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "deliverBatch",
-        "O1_Batch1",
-        "ORG3"
+        "O2_Batch1",
+        "ORG3",
+        "Warsaw-Warehouse-12A",
+        "OK – good quality, no defects",
+        "1kg vacuum bag",
+        "medium"
     ]
 }'
 ```
@@ -180,7 +186,7 @@ Query order:
 invoke -c '{
     "Args": [
         "queryOrder",
-        "ORDER1"
+        "ORDER2"
     ]
 }'
 ```
@@ -189,7 +195,7 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "queryBatch",
-        "O1_BATCH1"
+        "O2_Batch1"
     ]
 }'
 ```
@@ -198,7 +204,7 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "getBatchHistory",
-        "O1_Batch1"
+        "O2_Batch1"
     ]
 }' 2>&1 | grep -oP '(?<=payload:").*(?=")' | sed 's/\\"/"/g' | jq '.'
 ```
@@ -207,7 +213,7 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "getOrderHistory",
-        "ORDER1"
+        "ORDER2"
     ]
 }' 2>&1 | grep -oP '(?<=payload:").*(?=")' | sed 's/\\"/"/g' | jq '.'
 ```
@@ -243,7 +249,7 @@ docker stack rm backend-prd
 ## Dev
 
 ```
-docker build -t backend-dev -f dev.Dockerfile .
+docker build -t backend-dev -f docker/dev.Dockerfile .
 ```
 
 ```
@@ -296,8 +302,8 @@ fabric-ca-client identity list \
 
 
 ```
-curl -s http://localhost:3000/order/ORDER1/history | jq .
-curl http://localhost:3000/batch/O1_Batch1/history | jq .
+curl -s http://localhost:3000/order/ORDER2/history | jq .
+curl http://localhost:3000/batch/O2_Batch1/history | jq .
 ```
 
 
@@ -311,12 +317,47 @@ curl -X POST http://localhost:3000/register \
 ```
 
 ```
-curl -X POST http://localhost:3000/login \
+curl -X POST http://10.0.1.139:3000/login \
   -H "Content-Type: application/json" \
   -d '{"username":"janek","password":"tajnehaslo123"}'
 ```
 
+# Database
+```
 psql -h localhost -U coffee_user -d coffee_db
+```
 
-curl http://localhost:3000/batch/O1_Batch1/history \
+```
+curl http://localhost:3000/batch/O2_Batch1/history \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2MzI4MzU5OCwiZXhwIjoxNzYzMjg3MTk4fQ.I5iIWWhwbFKPDrxf0L1b3Eb4faEw1MonuWxEN3y52CU"
+```
+
+# Frontend
+
+## DEV
+
+```
+docker build -t "frontend-dev" -f "frontend/docker/dev.Dockerfile" .
+```
+
+```
+docker run --rm --name "frontend-dev" -p 3000:3000 -p 4000:4000 -p 5000:5000 \
+     --network fabric_test \
+     -v "$(pwd)/frontend/src:/app/src" \
+     -v "$(pwd)/frontend/config:/app/config" \
+     -v "$(pwd)/frontend/package.json:/app/package.json" \
+     -v "$(pwd)/frontend/package-lock.json:/app/package-lock.json" \
+     -v "$(pwd)/frontend/tsconfig.json:/app/tsconfig.json" \
+     -v "$(pwd)/frontend/tsconfig.app.json:/app/tsconfig.app.json" \
+     -v "$(pwd)/frontend/tsconfig.node.json:/app/tsconfig.node.json" \
+     -v "$(pwd)/frontend/tsconfig.test.json:/app/tsconfig.test.json" \
+     -v "$(pwd)/frontend/assets:/app/assets" \
+     -it "frontend-dev" /bin/sh
+```
+
+
+## PRD
+
+```
+docker build -t "frontend-prd" -f "frontend/docker/prd.Dockerfile" .
+```

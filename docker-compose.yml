@@ -4,9 +4,10 @@ services:
   backend:
     image: backend-prd
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - NODE_ENV=production
+      - PORT=3000
       - CERTS_PATH=/usr/src/app/certs
       - KEY_PATH=/run/secrets/key
       - APP_USER=appUser1
@@ -34,8 +35,17 @@ services:
     secrets:
       - postgres_password
     volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
-      - ../init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - fabric_test
+
+  frontend:
+    image: frontend-prd
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
     networks:
       - fabric_test
 

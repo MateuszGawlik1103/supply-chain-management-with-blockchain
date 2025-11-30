@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-./backend/scripts/destroy_backend_stack.sh
+./scripts/destroy_app_stack.sh
 
 cd network
 

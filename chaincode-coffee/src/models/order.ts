@@ -12,6 +12,9 @@ export class Order {
   public coffeeType: string = '';
 
   @Property()
+  public description: string = '';
+
+  @Property()
   public quantity: number = 0;
 
   @Property()

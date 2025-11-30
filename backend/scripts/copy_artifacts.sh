@@ -7,9 +7,9 @@ set -e
 APP_USER="$1"
 ORG_NAME="org1"
 ORG_DOMAIN="example.com"
-NETWORK_DIR="${PWD}/../network"   # relative path from backend/scripts/
-BACKEND_CERTS_DIR="${PWD}/certs"
-BACKEND_SECRETS_DIR="${PWD}/secrets"
+NETWORK_DIR="${PWD}/network"   # relative path from backend/scripts/
+BACKEND_CERTS_DIR="${PWD}/backend/certs"
+BACKEND_SECRETS_DIR="${PWD}/backend/secrets"
 
 # ================================
 # Paths to Fabric MSP files
