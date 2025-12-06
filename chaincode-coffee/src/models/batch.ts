@@ -43,4 +43,7 @@ export class Batch {
 
   @Property()
   public roastLevel?: string;
+
+  @Property()
+  public displayName?: string;
 }

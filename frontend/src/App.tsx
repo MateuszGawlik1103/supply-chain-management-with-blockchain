@@ -3,10 +3,10 @@ import Register from '#components/Register';
 import Login from '#components/Login';
 import BatchHistory from '#components/BatchHistory';
 import Logout from '#components/Logout';
-import MyHistory from '#components/MyHistory';
 import { AuthProvider, useAuth } from '#context/AuthContext';
 import styles from './App.module.css';
 import { useState } from 'react';
+import ProtectedRoute from '#components/ProtectedRoute';
 
 function Navbar() {
   const { user } = useAuth();
@@ -35,7 +35,6 @@ function Navbar() {
             {isDropdownOpen && (
               <div className={styles.dropdownMenu}>
                 <Link className={styles.dropdownItem} to="/batch">Check Coffee History</Link>
-                <Link to="/history" className={styles.dropdownItem}>My History</Link>
                 <Link className={styles.dropdownItem} to="/logout">Logout</Link>
               </div>
             )}
@@ -58,7 +57,6 @@ function Home() {
         {user ? (
           <>
             <Link to="/batch" className={styles.homeButton}>Check Coffee History</Link>
-            <Link to="/history" className={styles.homeButton}>My History</Link>
             <Link to="/logout" className={styles.homeButton}>Logout</Link>
           </>
         ) : (
@@ -81,10 +79,9 @@ function App() {
           <main className={styles.mainContent}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/history" element={<MyHistory />} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/batch" element={<BatchHistory />} />
+              <Route path="/batch" element={<ProtectedRoute element={<BatchHistory />} />} />
               <Route path="/logout" element={<Logout />} />
             </Routes>
           </main>

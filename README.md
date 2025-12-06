@@ -103,10 +103,6 @@ peer lifecycle chaincode querycommitted -C mychannel --name basic
 
 # Execute chaincode function
 
-```
-source ./lifecycle_org1_setup.sh
-```
-
 Alias:
 ```
 alias invoke="peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com \
@@ -117,11 +113,16 @@ alias invoke="peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverri
 ```
 
 Add coffee order:
+
+```
+source ./lifecycle_org3_setup.sh
+```
+
 ```
 invoke -c '{
     "Args": [
         "placeOrder",
-        "ORDER2",
+        "ORDER1",
         "Arabica",
         "Arabica from select crops, known for its delicate acidity and clean, sweet finish. These beans are of consistent quality, ideal for specialty coffees.",
         "100",
@@ -132,12 +133,16 @@ invoke -c '{
 ```
 
 ```
+source ./lifecycle_org1_setup.sh
+```
+
+```
 invoke -c '{
     "Args": [
         "createBatch",
-        "O2_Batch1",
+        "O1_Batch1",
         "Brazil",
-        "ORDER2",
+        "ORDER1",
         "100",
         "ORG1"
     ]
@@ -145,10 +150,14 @@ invoke -c '{
 ```
 
 ```
+source ./lifecycle_org2_setup.sh
+```
+
+```
 invoke -c '{
     "Args": [
         "shipBatch",
-        "O2_Batch1",
+        "O1_Batch1",
         "ORG2",
         "Container ship"
     ]
@@ -159,7 +168,7 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "updateTemperatureAndHumidity",
-        "O2_Batch1",
+        "O1_Batch1",
         "34",
         "15"
     ]
@@ -167,15 +176,20 @@ invoke -c '{
 ```
 
 ```
+source ./lifecycle_org3_setup.sh
+```
+
+```
 invoke -c '{
     "Args": [
         "deliverBatch",
-        "O2_Batch1",
+        "O1_Batch1",
         "ORG3",
         "Warsaw-Warehouse-12A",
         "OK – good quality, no defects",
         "1kg vacuum bag",
-        "medium"
+        "medium",
+        "Arabica Supremo"
     ]
 }'
 ```
@@ -186,7 +200,7 @@ Query order:
 invoke -c '{
     "Args": [
         "queryOrder",
-        "ORDER2"
+        "O1_Batch1"
     ]
 }'
 ```
@@ -195,7 +209,7 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "queryBatch",
-        "O2_Batch1"
+        "ORDER1"
     ]
 }'
 ```
@@ -204,18 +218,17 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "getBatchHistory",
-        "O2_Batch1"
+        "R1_Batch1"
     ]
 }' 2>&1 | grep -oP '(?<=payload:").*(?=")' | sed 's/\\"/"/g' | jq '.'
 ```
 
 ```
-invoke -c '{
-    "Args": [
-        "getOrderHistory",
-        "ORDER2"
-    ]
-}' 2>&1 | grep -oP '(?<=payload:").*(?=")' | sed 's/\\"/"/g' | jq '.'
+invoke -c '{ "Args": ["getBatchHistory", "O1_Batch1"] }' 2>&1 \
+| grep -oP '(?<=payload:").*(?=")' \
+| sed 's/\\"/"/g; s/\\\([0-7]\{1,3\}\)/\\u00\1/g' \
+| jq .
+
 ```
 
 # Backend
@@ -302,8 +315,8 @@ fabric-ca-client identity list \
 
 
 ```
-curl -s http://localhost:3000/order/ORDER2/history | jq .
-curl http://localhost:3000/batch/O2_Batch1/history | jq .
+curl -s http://localhost:3000/order/ORDER1/history | jq .
+curl http://localhost:3000/batch/O1_Batch1/history | jq .
 ```
 
 
@@ -328,7 +341,7 @@ psql -h localhost -U coffee_user -d coffee_db
 ```
 
 ```
-curl http://localhost:3000/batch/O2_Batch1/history \
+curl http://localhost:3000/batch/O1_Batch1/history \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2MzI4MzU5OCwiZXhwIjoxNzYzMjg3MTk4fQ.I5iIWWhwbFKPDrxf0L1b3Eb4faEw1MonuWxEN3y52CU"
 ```
 

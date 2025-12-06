@@ -14,21 +14,16 @@ export const Login = () => {
     try {
       const res = await api.post('/login', { username, password });
 
-      if (res.data.token) {
-        setToken(res.data.token);
-      }
+      if (res.data.token) setToken(res.data.token);
+      setUser({ username: res.data.user?.username || username });
 
-      if (res.data.user?.username) {
-        setUser({ username: res.data.user.username });
-      } else {
-        setUser({ username });
-      }
       alert('User logged in!');
       navigate('/');
     } catch (err: any) {
       alert(err.response?.data?.error || 'Error');
     }
   };
+
 
   return (
     <div className={styles.container}>

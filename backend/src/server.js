@@ -11,7 +11,6 @@ import cors from 'cors';
 
 dotenv.config();
 
-
 // === Configuration ===
 const channelName = 'mychannel';
 const chaincodeName = 'coffee';
@@ -23,9 +22,6 @@ const tlsCertPath = `${certificatesPath}/${userId}-ca.pem`;
 const keyPath = process.env.KEY_PATH;
 const peerEndpoint = process.env.PEER_ENDPOINT || 'peer0.org1.example.com:7051';
 const JWT_SECRET = process.env.JWT_SECRET;
-
-console.log(userId)
-console.log(certificatesPath)
 
 function prettyJSONString(inputString) {
 	try {
@@ -168,7 +164,6 @@ app.get('/batch/:id', authMiddleware, async (req, res) => {
   try {
     const resultBytes = await fabricConnection.contract.evaluateTransaction('queryBatch', id);
 
-    // Zamiana bajtów na string i parsowanie do JSON
     const resultString = Buffer.from(resultBytes).toString('utf8');
     const batchData = JSON.parse(resultString);
 
@@ -182,43 +177,85 @@ app.get('/batch/:id', authMiddleware, async (req, res) => {
 // Query batch history
 app.get('/batch/:id/history', authMiddleware, async (req, res) => {
   const { id } = req.params;
+  console.log("Fetching batch history for ID:", id);
 
   try {
-    // First check in ledger if batch_id exists
     const resultBytes = await fabricConnection.contract.evaluateTransaction('getBatchHistory', id);
+
+    if (!resultBytes || resultBytes.length === 0) {
+      return res.status(404).json({ error: `No history found for batch ID ${id}` });
+    }
+
     const resultString = Buffer.from(resultBytes).toString('utf8');
     const batchData = JSON.parse(resultString);
 
-    // If batch_id exists then save in database
-    if (batchData && batchData.length > 0) {
-      await pool.query(
-        'INSERT INTO user_batches (user_id, batch_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-        [req.userId, id]
-      );
+    if (!batchData || batchData.length === 0) {
+      return res.status(404).json({ error: `No history found for batch ID ${id}` });
     }
 
+    const latest = batchData[0];
+    const orderId = latest.value.orderId;
+
+    if (!orderId) {
+      return res.status(404).json({ error: `Order ID not found in batch ${id}` });
+    }
+
+    const resultOrderBytes = await fabricConnection.contract.evaluateTransaction('queryOrder', orderId);
+
+    if (!resultOrderBytes || resultOrderBytes.length === 0) {
+      return res.status(404).json({ error: `Order ${orderId} not found in ledger` });
+    }
+
+    const resultOrderString = Buffer.from(resultOrderBytes).toString('utf8');
+    const orderData = JSON.parse(resultOrderString);
+
+    const displayName = latest.value.displayName || null;
+    const coffeeType = orderData.coffeeType || null;
+
+    await pool.query(
+      `INSERT INTO user_batches (user_id, batch_id, display_name, coffee_type)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (user_id, batch_id) DO UPDATE 
+         SET display_name = EXCLUDED.display_name,
+             coffee_type = EXCLUDED.coffee_type`,
+      [req.userId, id, displayName, coffeeType]
+    );
+
     res.json(batchData);
+  } catch (err) {
+    console.error("FABRIC ERROR:", err);
+
+    const cleanMessage = err.message?.split("chaincode response 500,")[1]?.trim()
+                        || err.message;
+
+    if (cleanMessage.includes("does not exist")) {
+      return res.status(404).json({ error: cleanMessage });
+    }
+
+    if (cleanMessage.includes("history contains non-batch entry")) {
+      return res.status(400).json({ error: cleanMessage });
+    }
+
+    return res.status(500).json({ error: cleanMessage });
+  }
+});
+
+app.get('/my-history', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT batch_id, display_name, coffee_type
+       FROM user_batches
+       WHERE user_id = $1`,
+      [req.userId]
+    );
+
+    res.json({ history: result.rows });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/my-history', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.userId;
-    console.log(userId);
-    const result = await pool.query(
-      'SELECT batch_id FROM user_batches WHERE user_id = $1 ORDER BY id DESC',
-      [userId]
-    );
-
-    res.json({ history: result.rows });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
 
 // Health check
 app.get('/', (req, res) => {

@@ -194,7 +194,8 @@ export class CoffeeSupplyChainContract extends Contract {
         location: string,
         qualityCheck: string,
         packagingType: string,
-        roastLevel: string
+        roastLevel: string,
+        displayName: string
     ): Promise<void> {
 
         const canWrite  = ctx.clientIdentity.getAttributeValue('canWrite');
@@ -238,11 +239,11 @@ export class CoffeeSupplyChainContract extends Contract {
         batch.humidity = null;
         batch.transport = null;
 
-        // New fields by distributor
         batch.location = location;
         batch.qualityCheck = qualityCheck;
         batch.packagingType = packagingType;
         batch.roastLevel = roastLevel;
+        batch.displayName = displayName;
 
         // ----- UPDATE ORDER -----
         const allDelivered = order.batchIds.every((id) => id === batchId || batch.status === 'DELIVERED');
@@ -277,20 +278,36 @@ export class CoffeeSupplyChainContract extends Contract {
     // ===== 6. Query functions =====
     @Transaction(false)
     public async queryOrder(ctx: Context, orderId: string): Promise<string> {
-        const orderBytes = await ctx.stub.getState(orderId);
-        if (!orderBytes || orderBytes.length === 0) {
+        const bytes = await ctx.stub.getState(orderId);
+
+        if (!bytes || bytes.length === 0) {
             throw new Error(`Order ${orderId} does not exist`);
         }
-        return orderBytes.toString();
+
+        const obj = JSON.parse(bytes.toString());
+
+        if (obj.docType !== 'order') {
+            throw new Error(`Order ${orderId} does not exist`);
+        }
+
+        return bytes.toString();
     }
 
     @Transaction(false)
     public async queryBatch(ctx: Context, batchId: string): Promise<string> {
-        const batchBytes = await ctx.stub.getState(batchId);
-        if (!batchBytes || batchBytes.length === 0) {
+        const bytes = await ctx.stub.getState(batchId);
+
+        if (!bytes || bytes.length === 0) {
             throw new Error(`Batch ${batchId} does not exist`);
         }
-        return batchBytes.toString();
+
+        const obj = JSON.parse(bytes.toString());
+
+        if (obj.docType !== 'batch') {
+            throw new Error(`Batch ${batchId} does not exist`);
+        }
+
+        return bytes.toString();
     }
 
     @Transaction(false)
@@ -300,22 +317,37 @@ export class CoffeeSupplyChainContract extends Contract {
 
         while (true) {
             const res = await iterator.next();
+
             if (res.value && res.value.value.toString()) {
+                const parsed = JSON.parse(res.value.value.toString());
+
+                if (parsed.docType !== 'batch') {
+                    throw new Error(`Batch ${batchId} does not exist`);
+                }
+
                 const record = {
                     txId: res.value.txId,
                     timestamp: res.value.timestamp,
-                    value: JSON.parse(res.value.value.toString()),
+                    value: parsed,
                     isDelete: res.value.isDelete
                 };
+
                 allResults.push(record);
             }
+
             if (res.done) {
                 await iterator.close();
                 break;
             }
         }
+
+        if (allResults.length === 0) {
+            throw new Error(`Batch ${batchId} does not exist`);
+        }
+
         return allResults;
     }
+
 
     @Transaction(false)
     public async getOrderHistory(ctx: Context, orderId: string): Promise<any[]> {
@@ -324,15 +356,26 @@ export class CoffeeSupplyChainContract extends Contract {
 
         while (true) {
             const res = await iterator.next();
+
             if (res.value && res.value.value.toString()) {
+                const parsed = JSON.parse(res.value.value.toString());
+
+                if (parsed.docType !== 'order') {
+                    throw new Error(
+                        `Key ${orderId} history contains non-order entry (found '${parsed.docType}')`
+                    );
+                }
+
                 const record = {
                     txId: res.value.txId,
                     timestamp: res.value.timestamp,
-                    value: JSON.parse(res.value.value.toString()),
+                    value: parsed,
                     isDelete: res.value.isDelete
                 };
+
                 allResults.push(record);
             }
+
             if (res.done) {
                 await iterator.close();
                 break;
@@ -341,5 +384,3 @@ export class CoffeeSupplyChainContract extends Contract {
 
         return allResults;
     }
-
-}
