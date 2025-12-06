@@ -23,14 +23,6 @@ const keyPath = process.env.KEY_PATH;
 const peerEndpoint = process.env.PEER_ENDPOINT || 'peer0.org1.example.com:7051';
 const JWT_SECRET = process.env.JWT_SECRET;
 
-function prettyJSONString(inputString) {
-	try {
-		return JSON.stringify(JSON.parse(inputString), null, 2);
-	} catch (e) {
-		return inputString;
-	}
-}
-
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -44,7 +36,6 @@ function authMiddleware(req, res, next) {
     res.status(401).json({ error: 'Invalid token' });
   }
 }
-
 
 // === Connect to Fabric Gateway once ===
 async function connectGateway() {

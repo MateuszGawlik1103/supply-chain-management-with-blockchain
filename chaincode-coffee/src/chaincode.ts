@@ -384,3 +384,4 @@ export class CoffeeSupplyChainContract extends Contract {
 
         return allResults;
     }
+}

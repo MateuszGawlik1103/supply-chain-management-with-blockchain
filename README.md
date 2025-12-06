@@ -1,3 +1,17 @@
+# To launch whole system
+
+To build whole system, i.e. hyperledger fabric network and application infrastructure:
+```
+./start_system.sh
+```
+
+To destroy whole system:
+```
+./destroy_system.sh
+```
+
+The following sections describes how to launch particular components of the system in development environment.
+
 # To launch a network
 
 ```
