@@ -6,9 +6,8 @@
 version: '3.7'
 
 networks:
-  test:
-    external:
-      name: fabric_test
+  fabric_test:
+    external: true
 
 services:
   couchdb0:
@@ -26,7 +25,7 @@ services:
     ports:
       - "5984:5984"
     networks:
-      - test
+      - fabric_test
 
   peer0.org1.example.com:
     environment:
@@ -55,7 +54,7 @@ services:
     ports:
       - "7984:5984"
     networks:
-      - test
+      - fabric_test
 
   peer0.org2.example.com:
     environment:
@@ -84,7 +83,7 @@ services:
     ports:
       - "8984:5984"
     networks:
-      - test
+      - fabric_test
 
   peer0.org3.example.com:
     environment:

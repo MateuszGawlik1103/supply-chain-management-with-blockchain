@@ -6,12 +6,10 @@
 version: '3.7'
 
 networks:
-  test:
-    external:
-      name: fabric_test
+  fabric_test:
+    external: true
 
 services:
-
   ca_org1:
     image: hyperledger/fabric-ca:latest
     labels:
@@ -30,7 +28,7 @@ services:
       - ../organizations/fabric-ca/org1:/etc/hyperledger/fabric-ca-server
     container_name: ca_org1
     networks:
-      - test
+      - fabric_test
 
   ca_org2:
     image: hyperledger/fabric-ca:latest
@@ -50,7 +48,7 @@ services:
       - ../organizations/fabric-ca/org2:/etc/hyperledger/fabric-ca-server
     container_name: ca_org2
     networks:
-      - test
+      - fabric_test
 
   ca_org3:
     image: hyperledger/fabric-ca:latest
@@ -70,7 +68,7 @@ services:
       - ../organizations/fabric-ca/org3:/etc/hyperledger/fabric-ca-server
     container_name: ca_org3
     networks:
-      - test
+      - fabric_test
 
   ca_orderer:
     image: hyperledger/fabric-ca:latest
@@ -90,4 +88,4 @@ services:
       - ../organizations/fabric-ca/ordererOrg:/etc/hyperledger/fabric-ca-server
     container_name: ca_orderer
     networks:
-      - test
+      - fabric_test

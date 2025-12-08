@@ -12,9 +12,8 @@ volumes:
   peer0.org3.example.com:
 
 networks:
-  test:
-    external:
-      name: fabric_test
+  fabric_test:
+    external: true
 
 services:
 
@@ -58,7 +57,7 @@ services:
       - 7053:7053
       - 9443:9443
     networks:
-      - test
+      - fabric_test
 
   peer0.org1.example.com:
     container_name: peer0.org1.example.com
@@ -99,7 +98,7 @@ services:
       - 7051:7051
       - 9444:9444
     networks:
-      - test
+      - fabric_test
 
   peer0.org2.example.com:
     container_name: peer0.org2.example.com
@@ -140,7 +139,7 @@ services:
       - 9051:9051
       - 9445:9445
     networks:
-      - test
+      - fabric_test
 
   peer0.org3.example.com:
     container_name: peer0.org3.example.com
@@ -181,4 +180,4 @@ services:
       - 6051:6051
       - 6445:6445
     networks:
-      - test
+      - fabric_test
