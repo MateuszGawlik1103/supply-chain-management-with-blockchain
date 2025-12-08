@@ -13,7 +13,7 @@ cd ${ROOT_DIR}/network
 
 sleep 5
 
-./init_chaincode.sh
+./init_ledger.sh
 
 cd ${ROOT_DIR}
 
