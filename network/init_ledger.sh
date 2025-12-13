@@ -74,8 +74,19 @@ invoke '{
   "Args": [
     "updateTemperatureAndHumidity",
     "O1_Batch1",
-    "34",
-    "15"
+    "16",
+    "55"
+  ]
+}'
+
+sleep 2
+
+invoke '{
+  "Args": [
+    "updateTemperatureAndHumidity",
+    "O1_Batch1",
+    "11",
+    "60"
   ]
 }'
 
@@ -158,10 +169,22 @@ invoke '{
   "Args": [
     "updateTemperatureAndHumidity",
     "O2_Batch1",
-    "29",
-    "18"
+    "22",
+    "57"
   ]
 }'
+
+sleep 2
+
+invoke '{
+  "Args": [
+    "updateTemperatureAndHumidity",
+    "O2_Batch1",
+    "23",
+    "60"
+  ]
+}'
+
 sleep 2
 #############################################################
 echo "=== STEP 4: ORG3 delivers Robusta batch to warehouse ==="

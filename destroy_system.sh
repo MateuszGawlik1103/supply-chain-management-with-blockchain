@@ -6,3 +6,5 @@ set -e
 cd network
 
 ./network.sh down
+
+docker network rm fabric_test

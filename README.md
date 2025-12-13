@@ -262,7 +262,7 @@ Create following files in `backend/certs/` folder:
 - cert - public certificate
 
 ```
-docker build -t backend-prd -f docker/prd.Dockerfile .
+docker build -t backend-prd -f backend/docker/prd.Dockerfile ./backend
 ```
 
 ```
@@ -386,5 +386,5 @@ docker run --rm --name "frontend-dev" -p 3000:3000 -p 4000:4000 -p 5000:5000 \
 ## PRD
 
 ```
-docker build -t "frontend-prd" -f "frontend/docker/prd.Dockerfile" .
+docker build -t "frontend-prd" -f "frontend/docker/prd.Dockerfile" ./frontend
 ```
