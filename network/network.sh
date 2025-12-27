@@ -143,7 +143,8 @@ function checkPrereqs() {
 # Create Organization crypto material using cryptogen or CAs
 function createOrgs() {
   if [ -d "organizations/peerOrganizations" ]; then
-    rm -Rf organizations/peerOrganizations && rm -Rf organizations/ordererOrganizations
+    rm -Rf organizations/peerOrganizations && \
+    rm -Rf organizations/ordererOrganizations
   fi
 
   # Create crypto material using Fabric CA
@@ -152,30 +153,6 @@ function createOrgs() {
     ${CONTAINER_CLI_COMPOSE} -f compose/$COMPOSE_FILE_CA up -d 2>&1
 
     . organizations/fabric-ca/registerEnroll.sh
-
-    # Make sure CA files have been created
-    while :
-    do
-      if [ ! -f "organizations/fabric-ca/org1/tls-cert.pem" ]; then
-        sleep 1
-      else
-        break
-      fi
-    done
-
-    # Make sure CA service is initialized and can accept requests before making register and enroll calls
-    export FABRIC_CA_CLIENT_HOME=${PWD}/organizations/peerOrganizations/org1.example.com/
-    COUNTER=0
-    rc=1
-    while [[ $rc -ne 0 && $COUNTER -lt $MAX_RETRY ]]; do
-      sleep 1
-      set -x
-      fabric-ca-client getcainfo -u https://admin:adminpw@localhost:7054 --caname ca-org1 --tls.certfiles "${PWD}/organizations/fabric-ca/org1/ca-cert.pem"
-      res=$?
-    { set +x; } 2>/dev/null
-    rc=$res  # Update rc
-    COUNTER=$((COUNTER + 1))
-    done
 
     infoln "Creating Org1 Identities"
 
@@ -195,7 +172,7 @@ function createOrgs() {
 
   fi
 
-  infoln "Generating CCP files for Org1 and Org2"
+  infoln "Generating CCP files for Org1, Org2 and Org3"
   ./organizations/ccp-generate.sh
 }
 
@@ -221,7 +198,7 @@ function createOrgs() {
 
 # After we create the org crypto material and the application channel genesis block,
 # we can now bring up the peers and ordering service. By default, the base
-# file for creating the network is "docker-compose-test-net.yaml" in the ``docker``
+# file for creating the network is "docker-compose-net.yaml" in the ``docker``
 # folder. This file defines the environment variables and file mounts that
 # point the crypto material and genesis block that were created in earlier.
 
@@ -242,7 +219,8 @@ function networkUp() {
   if [ "${DATABASE}" == "couchdb" ]; then
     COMPOSE_FILES="${COMPOSE_FILES} -f compose/${COMPOSE_FILE_COUCH}"
   fi
-  DOCKER_SOCK="${DOCKER_SOCK}" ${CONTAINER_CLI_COMPOSE} ${COMPOSE_FILES} up -d 2>&1
+  DOCKER_SOCK="${DOCKER_SOCK}" ${CONTAINER_CLI_COMPOSE} \
+    ${COMPOSE_FILES} up -d 2>&1
   infoln "${DOCKER_SOCK}"
   infoln "${CONTAINER_CLI_COMPOSE} ${COMPOSE_FILES} up -d"
 
@@ -367,7 +345,7 @@ function queryChaincode() {
 # Tear down running network
 function networkDown() {
   local temp_compose=$COMPOSE_FILE_BASE
-  COMPOSE_FILE_BASE=compose-test-net.yaml
+  COMPOSE_FILE_BASE=compose-net.yaml
   COMPOSE_BASE_FILES="-f compose/${COMPOSE_FILE_BASE}"
   COMPOSE_COUCH_FILES="-f compose/${COMPOSE_FILE_COUCH}"
   COMPOSE_CA_FILES="-f compose/${COMPOSE_FILE_CA}"
@@ -406,7 +384,7 @@ function networkDown() {
 . ./network.config
 
 # use this as the default docker-compose yaml definition
-COMPOSE_FILE_BASE=compose-test-net.yaml
+COMPOSE_FILE_BASE=compose-net.yaml
 # docker-compose.yaml file if you are using couchdb
 COMPOSE_FILE_COUCH=compose-couch.yaml
 # certificate authorities compose file
@@ -555,11 +533,6 @@ while [[ $# -ge 1 ]] ; do
   esac
   shift
 done
-
-if [ $BFT -eq 1 ]; then
-  export FABRIC_CFG_PATH=${PWD}/bft-config
-  COMPOSE_FILE_BASE=compose-bft-test-net.yaml
-fi
 
 # Are we generating crypto material with this command?
 if [ ! -d "organizations/peerOrganizations" ]; then

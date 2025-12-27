@@ -277,7 +277,10 @@ export class CoffeeSupplyChainContract extends Contract {
 
     // ===== 6. Query functions =====
     @Transaction(false)
-    public async queryOrder(ctx: Context, orderId: string): Promise<string> {
+    public async queryOrder(
+        ctx: Context,
+        orderId: string,
+    ): Promise<string> {
         const bytes = await ctx.stub.getState(orderId);
 
         if (!bytes || bytes.length === 0) {

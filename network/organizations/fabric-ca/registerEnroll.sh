@@ -57,7 +57,7 @@ EOF
     IFS=":" read -r NAME PASS TYPE CANWRITE <<< "$ID"
     set -x
     if [ "$CANWRITE" = "1" ]; then
-      # user with write permission
+      # User with write permission
       fabric-ca-client register \
         --caname ${CA_NAME} \
         --id.name ${NAME} \
@@ -66,7 +66,7 @@ EOF
         --id.attrs "canWrite=1:ecert,organization=${ORG_NAME}:ecert" \
         --tls.certfiles "${PWD}/organizations/fabric-ca/${ORG_NAME}/ca-cert.pem"
     elif [ "$CANWRITE" = "0" ]; then
-      # user without write permission
+      # User without write permission
       fabric-ca-client register \
         --caname ${CA_NAME} \
         --id.name ${NAME} \
@@ -75,7 +75,7 @@ EOF
         --id.attrs "canWrite=0:ecert,organization=${ORG_NAME}:ecert" \
         --tls.certfiles "${PWD}/organizations/fabric-ca/${ORG_NAME}/ca-cert.pem"
     else
-      # Peer don't need this attribute
+      # Peers don't need write attribute
       fabric-ca-client register \
         --caname ${CA_NAME} \
         --id.name ${NAME} \

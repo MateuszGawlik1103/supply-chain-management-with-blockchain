@@ -12,7 +12,8 @@ export const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const res = await api.post('/login', { username, password });
+      const res = await api.post(
+        '/login', { username, password });
 
       if (res.data.token) setToken(res.data.token);
       setUser({ username: res.data.user?.username || username });
@@ -23,7 +24,6 @@ export const Login = () => {
       alert(err.response?.data?.error || 'Error');
     }
   };
-
 
   return (
     <div className={styles.container}>

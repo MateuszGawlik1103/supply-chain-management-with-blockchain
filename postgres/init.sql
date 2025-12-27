@@ -5,10 +5,9 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS user_batches (
-    id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
     batch_id VARCHAR(100) NOT NULL,
     display_name VARCHAR(255),
     coffee_type VARCHAR(100),
-    UNIQUE(user_id, batch_id)
+    PRIMARY KEY (user_id, batch_id)
 );

@@ -22,7 +22,7 @@ export const Logout = () => {
         console.error('Error logging out:', err);
       } finally {
         setToken(null);
-        setUser(null); // wyczyść też usera
+        setUser(null);
         localStorage.removeItem('token');
         alert('User logged out!');
         navigate('/');

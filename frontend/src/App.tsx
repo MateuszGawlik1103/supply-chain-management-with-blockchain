@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '#context/AuthContext';
 import styles from './App.module.css';
 import { useState } from 'react';
 import ProtectedRoute from '#components/ProtectedRoute';
+import Home from '#components/Home/Home.tsx';
 
 function Navbar() {
   const { user } = useAuth();
@@ -45,31 +46,6 @@ function Navbar() {
   );
 }
 
-
-function Home() {
-  const { user } = useAuth();
-
-  return (
-    <div className={styles.homeContainer}>
-      <h1>Welcome to CoffeeTracker</h1>
-      <p>Track your coffee batches from farm to cup. See detailed batch history, transport conditions, and quality checks.</p>
-      <div className={styles.homeButtons}>
-        {user ? (
-          <>
-            <Link to="/batch" className={styles.homeButton}>Check Coffee History</Link>
-            <Link to="/logout" className={styles.homeButton}>Logout</Link>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className={styles.homeButton}>Login</Link>
-            <Link to="/register" className={styles.homeButton}>Register</Link>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function App() {
   return (
     <AuthProvider>
@@ -81,7 +57,9 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/batch" element={<ProtectedRoute element={<BatchHistory />} />} />
+              <Route path="/batch"element={
+                <ProtectedRoute element={<BatchHistory />} />
+              } />
               <Route path="/logout" element={<Logout />} />
             </Routes>
           </main>

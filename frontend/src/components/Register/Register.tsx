@@ -10,9 +10,10 @@ export const Register = () => {
 
   const handleRegister = async () => {
     try {
-      const res = await api.post('/register', { username, password });
+      const res = await api.post(
+        '/register', { username, password });
       alert(`Registered user: ${res.data.user.username}`);
-      navigate('/'); // przekierowanie na home po rejestracji
+      navigate('/');
     } catch (err: any) {
       alert(err.response?.data?.error || 'Error');
     }

@@ -4,7 +4,8 @@ set -e
 ROOT_DIR="${PWD}"
 echo "$ROOT_DIR"
 
-docker network create -d overlay --attachable fabric_test >/dev/null 2>&1 || true
+docker network create -d overlay --attachable fabric_test \
+    >/dev/null 2>&1 || true
 
 cd ${ROOT_DIR}/network
 

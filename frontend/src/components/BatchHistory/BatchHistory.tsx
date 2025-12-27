@@ -185,14 +185,27 @@ export const BatchHistory = () => {
         <ul className={styles.historyList}>
           {history.map((step, index) => (
             <li key={index} className={styles.historyItem}>
-              <strong>Status:</strong> {statusDescriptions[step.status] || step.status}<br />
-              {step.productOwner && <><strong>Owner:</strong> {step.productOwner}<br /></>}
-              {(step.status === 'READY_FOR_DELIVERY') && step.originFarm && <><strong>Origin Farm:</strong> {step.originFarm}<br /></>}
-              {(step.transport != null) && <><strong>Form of transport:</strong> {step.transport}<br /></>}
-              {(step.status === 'IN_TRANSIT') && <><strong>Average Temperature in transport:</strong> {avgTemp ?? "N/A"} °C<br /></>}
-              {(step.status === 'IN_TRANSIT') && <><strong>Average Humidity in transport:</strong> {avgHumidity ?? "N/A"} %<br /></>}
-              {step.location && <><strong>Location:</strong> {step.location}<br /></>}
-              {step.qualityCheck && <><strong>Quality check:</strong> {step.qualityCheck}<br /></>}
+              <strong>Status:</strong>
+              {statusDescriptions[step.status] || step.status}<br />
+              {step.productOwner &&
+                <><strong>Owner:</strong> {step.productOwner}<br /></>}
+              {(step.status === 'READY_FOR_DELIVERY') &&
+                step.originFarm && <><strong>Origin Farm:</strong>
+                {step.originFarm}<br /></>}
+              {(step.transport != null) &&
+                <><strong>Form of transport:</strong>
+                {step.transport}<br /></>}
+              {(step.status === 'IN_TRANSIT') && 
+                <><strong>Average Temperature in transport:</strong>
+                {avgTemp ?? "N/A"} °C<br /></>}
+              {(step.status === 'IN_TRANSIT') &&
+                <><strong>Average Humidity in transport:</strong>
+                {avgHumidity ?? "N/A"} %<br /></>}
+              {step.location &&
+                <><strong>Location:</strong> {step.location}<br /></>}
+              {step.qualityCheck &&
+                <><strong>Quality check:</strong>
+                {step.qualityCheck}<br /></>}
               <strong>Time:</strong> {step.timestamp}
             </li>
           ))}
