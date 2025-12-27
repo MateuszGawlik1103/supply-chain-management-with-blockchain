@@ -214,7 +214,7 @@ Query order:
 invoke -c '{
     "Args": [
         "queryOrder",
-        "O1_Batch1"
+        "ORDER1"
     ]
 }'
 ```
@@ -223,7 +223,7 @@ invoke -c '{
 invoke -c '{
     "Args": [
         "queryBatch",
-        "ORDER1"
+        "O1_Batch1"
     ]
 }'
 ```
