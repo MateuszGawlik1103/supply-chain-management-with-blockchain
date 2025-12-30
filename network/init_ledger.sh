@@ -17,7 +17,7 @@ invoke() {
 echo "=== STEP 1: ORG3 places coffee order ==="
 ##############################################
 
-source ./lifecycle_org3_setup.sh
+source ./lifecycle_org3_setup.sh Admin
 
 invoke '{
   "Args": [
@@ -36,7 +36,7 @@ sleep 2
 echo "=== STEP 2: ORG1 creates batch for ORDER1 ==="
 ###################################################
 
-source ./lifecycle_org1_setup.sh
+source ./lifecycle_org1_setup.sh Admin
 
 invoke '{
   "Args": [
@@ -55,7 +55,7 @@ sleep 2
 echo "=== STEP 3: ORG2 ships the batch O1_Batch1 ==="
 ################################################
 
-source ./lifecycle_org2_setup.sh
+source ./lifecycle_org2_setup.sh Admin
 
 invoke '{
   "Args": [
@@ -95,7 +95,7 @@ sleep 2
 echo "=== STEP 4: ORG3 delivers batch to warehouse ==="
 ###################################################
 
-source ./lifecycle_org3_setup.sh
+source ./lifecycle_org3_setup.sh Admin
 
 invoke '{
   "Args": [
@@ -117,7 +117,7 @@ sleep 2
 echo "=== STEP 1: ORG3 places Robusta coffee order ==="
 #########################################################
 
-source ./lifecycle_org3_setup.sh
+source ./lifecycle_org3_setup.sh Admin
 
 invoke '{
   "Args": [
@@ -135,7 +135,7 @@ sleep 2
 echo "=== STEP 2: ORG1 creates batch for Robusta ORDER2 ==="
 #############################################################
 
-source ./lifecycle_org1_setup.sh
+source ./lifecycle_org1_setup.sh Admin
 
 invoke '{
   "Args": [
@@ -152,7 +152,7 @@ sleep 2
 echo "=== STEP 3: ORG2 ships the batch O2_Batch1 ==="
 #########################################################
 
-source ./lifecycle_org2_setup.sh
+source ./lifecycle_org2_setup.sh Admin
 
 invoke '{
   "Args": [
@@ -190,7 +190,7 @@ sleep 2
 echo "=== STEP 4: ORG3 delivers Robusta batch to warehouse ==="
 #############################################################
 
-source ./lifecycle_org3_setup.sh
+source ./lifecycle_org3_setup.sh Admin
 
 invoke '{
   "Args": [

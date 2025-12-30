@@ -24,11 +24,11 @@ export class CoffeeSupplyChainContract extends Contract {
         // Check if organization is authorized to execute this function
         const organization  = ctx.clientIdentity.getAttributeValue('organization');
 
-        if (canWrite !== "1") {
-            throw new Error('Not authorized to write!');
-        }
-
         if (organization !== "org3") {
+            throw new Error('This organization is not authorized to execute this transaction!');
+        }
+        
+        if (canWrite !== "1") {
             throw new Error('Not authorized to write!');
         }
 
@@ -70,11 +70,11 @@ export class CoffeeSupplyChainContract extends Contract {
         // Check if organization is authorized to execute this function
         const organization  = ctx.clientIdentity.getAttributeValue('organization');
 
-        if (canWrite !== "1") {
-            throw new Error('Not authorized to write!');
-        }
-
         if (organization !== "org1") {
+            throw new Error('This organization is not authorized to execute this transaction!');
+        }
+        
+        if (canWrite !== "1") {
             throw new Error('Not authorized to write!');
         }
 
