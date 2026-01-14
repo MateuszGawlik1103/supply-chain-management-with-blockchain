@@ -110,6 +110,8 @@ invoke '{
   ]
 }'
 
+echo "=== ALL STEPS COMPLETED — ARABICA FLOW SUCCESSFUL ==="
+
 sleep 2
 # ROBUSTA
 

@@ -124,12 +124,12 @@ export class CoffeeSupplyChainContract extends Contract {
         // Check if organization is authorized to execute this function
         const organization  = ctx.clientIdentity.getAttributeValue('organization');
 
-        if (canWrite !== "1") {
-            throw new Error('Not authorized to write!');
-        }
-
         if (organization !== "org2") {
             throw new Error('This organization is not authorized to execute this transaction!');
+        }
+        
+        if (canWrite !== "1") {
+            throw new Error('Not authorized to write!');
         }
 
         const batchBytes = await ctx.stub.getState(batchId);
@@ -138,11 +138,15 @@ export class CoffeeSupplyChainContract extends Contract {
         }
         const batch: Batch = JSON.parse(batchBytes.toString());
 
+        if (batch.status !== 'READY_FOR_DELIVERY') {
+            throw new Error(`Batch ${batchId} is not in READY_FOR_DELIVERY status`);
+        }
+
         const orderId = batch.orderId
         const orderBytes = await ctx.stub.getState(orderId);
 
         if (!orderBytes || orderBytes.length === 0) {
-            throw new Error(`Batch ${orderId} does not exist`);
+            throw new Error(`Order ${orderId} does not exist`);
         }
 
         batch.status = 'IN_TRANSIT';
@@ -165,12 +169,12 @@ export class CoffeeSupplyChainContract extends Contract {
         // Check if organization is authorized to execute this function
         const organization  = ctx.clientIdentity.getAttributeValue('organization');
 
-        if (canWrite !== "1") {
-            throw new Error('Not authorized to write!');
-        }
-
         if (organization !== "org2") {
             throw new Error('This organization is not authorized to execute this transaction!');
+        }
+        
+        if (canWrite !== "1") {
+            throw new Error('Not authorized to write!');
         }
 
         const batchBytes = await ctx.stub.getState(batchId);
@@ -179,6 +183,11 @@ export class CoffeeSupplyChainContract extends Contract {
         }
 
         const batch: Batch = JSON.parse(batchBytes.toString());
+
+        if (batch.status !== 'IN_TRANSIT') {
+            throw new Error(`Batch ${batchId} is not in transit`);
+        }
+
         batch.temperature = temperature;
         batch.humidity = humidity;
 
@@ -201,12 +210,12 @@ export class CoffeeSupplyChainContract extends Contract {
         const canWrite  = ctx.clientIdentity.getAttributeValue('canWrite');
         const organization  = ctx.clientIdentity.getAttributeValue('organization');
 
-        if (canWrite !== "1") {
-            throw new Error('Not authorized to write!');
-        }
-
         if (organization !== "org3") {
             throw new Error('This organization is not authorized to execute this transaction!');
+        }
+        
+        if (canWrite !== "1") {
+            throw new Error('Not authorized to write!');
         }
 
         // --- Read batch ---

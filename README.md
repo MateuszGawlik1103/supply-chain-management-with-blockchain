@@ -144,7 +144,7 @@ invoke -c '{
         "ORDER3",
         "Arabica",
         "Arabica from select crops, known for its delicate acidity and clean, sweet finish. These beans are of consistent quality, ideal for specialty coffees.",
-        "100",
+        "200",
         "ORG3",
         "2025-11-10"
     ]
@@ -188,8 +188,8 @@ invoke -c '{
     "Args": [
         "updateTemperatureAndHumidity",
         "O3_Batch1",
-        "34",
-        "15"
+        "32",
+        "12"
     ]
 }'
 ```
@@ -213,15 +213,17 @@ invoke -c '{
 }'
 ```
 
-
 Query order:
 ```
-invoke -c '{
-    "Args": [
-        "queryOrder",
-        "ORDER3"
-    ]
-}'
+invoke -c '{ "Args": [ "queryOrder", "ORDER3" ] }' 2>&1 | grep -oP '(?<=payload:").*(?=")' | sed 's/\\"/"/g' | jq '.'
+```
+
+```
+invoke -c '{ "Args": ["getOrderHistory", "ORDER3"] }' 2>&1 \
+| grep -oP '(?<=payload:").*(?=")' \
+| sed 's/\\"/"/g; s/\\\([0-7]\{1,3\}\)/\\u00\1/g' \
+| jq .
+
 ```
 
 ```
@@ -230,16 +232,10 @@ invoke -c '{
         "queryBatch",
         "O3_Batch1"
     ]
-}'
-```
-
-```
-invoke -c '{
-    "Args": [
-        "getBatchHistory",
-        "R1_Batch1"
-    ]
-}' 2>&1 | grep -oP '(?<=payload:").*(?=")' | sed 's/\\"/"/g' | jq '.'
+}' 2>&1 \
+| grep -oP '(?<=payload:").*(?=")' \
+| sed 's/\\"/"/g; s/\\\([0-7]\{1,3\}\)/\\u00\1/g' \
+| jq .
 ```
 
 ```

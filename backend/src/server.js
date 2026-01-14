@@ -135,8 +135,6 @@ app.post('/logout', authMiddleware, (req, res) => {
   res.json({ message: 'Successfully logged out' });
 });
 
-
-
 // Query order history
 // app.get('/order/:id/history', async (req, res) => {
 // 	const { id } = req.params;
