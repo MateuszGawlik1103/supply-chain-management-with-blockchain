@@ -85,7 +85,7 @@ export class CoffeeSupplyChainContract extends Contract {
 
         const orderBytes = await ctx.stub.getState(orderId);
         if (!orderBytes || orderBytes.length === 0) {
-            throw new Error(`Order ${orderId} does not exist`);
+            throw new Error(`Order ${orderId} not found`);
         }
 
         const order: Order = JSON.parse(orderBytes.toString());
@@ -134,7 +134,7 @@ export class CoffeeSupplyChainContract extends Contract {
 
         const batchBytes = await ctx.stub.getState(batchId);
         if (!batchBytes || batchBytes.length === 0) {
-            throw new Error(`Batch ${batchId} does not exist`);
+            throw new Error(`Batch ${batchId} not found`);
         }
         const batch: Batch = JSON.parse(batchBytes.toString());
 
@@ -146,7 +146,7 @@ export class CoffeeSupplyChainContract extends Contract {
         const orderBytes = await ctx.stub.getState(orderId);
 
         if (!orderBytes || orderBytes.length === 0) {
-            throw new Error(`Order ${orderId} does not exist`);
+            throw new Error(`Order ${orderId} not found`);
         }
 
         batch.status = 'IN_TRANSIT';
@@ -179,7 +179,7 @@ export class CoffeeSupplyChainContract extends Contract {
 
         const batchBytes = await ctx.stub.getState(batchId);
         if (!batchBytes || batchBytes.length === 0) {
-            throw new Error(`Batch ${batchId} does not exist`);
+            throw new Error(`Batch ${batchId} not found`);
         }
 
         const batch: Batch = JSON.parse(batchBytes.toString());
@@ -222,7 +222,7 @@ export class CoffeeSupplyChainContract extends Contract {
         const batchBytes = await ctx.stub.getState(batchId);
 
         if (!batchBytes || batchBytes.length === 0) {
-            throw new Error(`Batch does not exist`);
+            throw new Error(`Batch not found`);
         }
 
         const batch: Batch = JSON.parse(batchBytes.toString());
@@ -231,7 +231,7 @@ export class CoffeeSupplyChainContract extends Contract {
         const orderBytes = await ctx.stub.getState(batch.orderId);
 
         if (!orderBytes || orderBytes.length === 0) {
-            throw new Error(`Order does not exist`);
+            throw new Error(`Order not found`);
         }
 
         const order: Order = JSON.parse(orderBytes.toString());
@@ -264,7 +264,7 @@ export class CoffeeSupplyChainContract extends Contract {
                 const batchBytes = await ctx.stub.getState(batchId);
 
                 if (!batchBytes || batchBytes.length === 0) {
-                    throw new Error(`Batch ${batchId} does not exist`);
+                    throw new Error(`Batch ${batchId} not found`);
                 }
 
                 const b: Batch = JSON.parse(batchBytes.toString());
@@ -293,13 +293,13 @@ export class CoffeeSupplyChainContract extends Contract {
         const bytes = await ctx.stub.getState(orderId);
 
         if (!bytes || bytes.length === 0) {
-            throw new Error(`Order ${orderId} does not exist`);
+            throw new Error(`Order ${orderId} not found`);
         }
 
         const obj = JSON.parse(bytes.toString());
 
         if (obj.docType !== 'order') {
-            throw new Error(`Order ${orderId} does not exist`);
+            throw new Error(`Order ${orderId} not found`);
         }
 
         return bytes.toString();
@@ -310,13 +310,13 @@ export class CoffeeSupplyChainContract extends Contract {
         const bytes = await ctx.stub.getState(batchId);
 
         if (!bytes || bytes.length === 0) {
-            throw new Error(`Batch ${batchId} does not exist`);
+            throw new Error(`Batch ${batchId} not found`);
         }
 
         const obj = JSON.parse(bytes.toString());
 
         if (obj.docType !== 'batch') {
-            throw new Error(`Batch ${batchId} does not exist`);
+            throw new Error(`Batch ${batchId} not found`);
         }
 
         return bytes.toString();
@@ -334,7 +334,7 @@ export class CoffeeSupplyChainContract extends Contract {
                 const parsed = JSON.parse(res.value.value.toString());
 
                 if (parsed.docType !== 'batch') {
-                    throw new Error(`Batch ${batchId} does not exist`);
+                    throw new Error(`Batch ${batchId} not found`);
                 }
 
                 const record = {
@@ -354,7 +354,7 @@ export class CoffeeSupplyChainContract extends Contract {
         }
 
         if (allResults.length === 0) {
-            throw new Error(`Batch ${batchId} does not exist`);
+            throw new Error(`Batch ${batchId} not found`);
         }
 
         return allResults;

@@ -105,7 +105,7 @@ app.post('/register', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(400).json({
-      error: 'Username already exists'
+      error: 'Failed to create account. Please check your details or try logging in.'
     });
   }
 });

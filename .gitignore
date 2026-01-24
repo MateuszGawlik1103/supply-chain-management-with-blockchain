@@ -164,3 +164,7 @@ log.txt
 
 backend/secrets
 backend/certs
+
+*.tex
+
+TODO
